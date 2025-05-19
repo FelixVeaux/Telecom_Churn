@@ -1,4 +1,4 @@
 Model Comparison using AIC:
-Weibull AFT AIC: 229476.18246050153
-Log-Logistic AFT AIC: 227066.36621254307
-Exponential lambda: 40.630664114358936
+Weibull AFT AIC: 341982.5595352811
+Log-Logistic AFT AIC: 321305.2485581398
+Exponential lambda: 38.42871097592888
