@@ -1,0 +1,5 @@
+Cluster,Number_of_Customers,Percentage_of_Total,Average_Revenue,Average_Completed_Calls,Average_Months_in_Service,Average_Blocked_Data_Calls,Average_Customer_Care_Minutes,Average_Minutes_of_Use,Average_Revenue_per_Month,Average_Call_Drop_Rate
+0,332,6.64,155.83,437.44,45.73,0.0,8.61,1957.73,3.41,20.0
+1,1470,29.4,83.13,168.92,42.59,0.02,6.38,785.61,1.95,8.72
+2,3197,63.94,41.5,56.69,41.25,0.0,1.01,233.02,1.01,2.58
+3,1,0.02,1193.54,676.0,45.0,1.0,5.0,7242.0,26.52,7.33
