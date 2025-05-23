@@ -1,0 +1,115 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import StandardScaler
+from scipy.cluster.hierarchy import dendrogram, linkage
+from sklearn.cluster import AgglomerativeClustering
+import seaborn as sns
+import os
+from tqdm import tqdm
+import gc  # For garbage collection
+
+print("Starting the analysis...")
+
+# Set style for better visualizations
+plt.style.use('default')
+sns.set_theme()
+
+# Define the file path
+file_path = '01_Initial_Data/Churn_Data_cleaned.csv'
+
+# First, read just the header to get column names
+print("Reading column names...")
+df_columns = pd.read_csv(file_path, nrows=0)
+print("Available columns:", df_columns.columns.tolist())
+
+# Read only numerical columns and take a sample
+print("Reading the data...")
+# Read a sample of 5000 rows
+df = pd.read_csv(file_path, 
+                 usecols=lambda x: pd.api.types.is_numeric_dtype(pd.read_csv(file_path, usecols=[x]).dtypes[x]),
+                 nrows=5000)  # Only read 5000 rows
+
+print("Data loaded. Shape:", df.shape)
+print("Columns used:", df.columns.tolist())
+
+# Convert to float32 to reduce memory usage
+for col in df.columns:
+    if df[col].dtype == 'float64':
+        df[col] = df[col].astype('float32')
+    elif df[col].dtype == 'int64':
+        df[col] = df[col].astype('int32')
+
+# Handle missing values
+print("Handling missing values...")
+df = df.fillna(df.mean())
+
+# Standardize the features
+print("Standardizing features...")
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(df)
+
+# Free up memory
+del df
+gc.collect()
+
+# Perform hierarchical clustering with a subset of data for the dendrogram
+print("Creating dendrogram...")
+sample_size = min(1000, len(X_scaled))  # Use a smaller sample for the dendrogram
+sample_indices = np.random.choice(len(X_scaled), sample_size, replace=False)
+X_sample = X_scaled[sample_indices]
+
+linkage_matrix = linkage(X_sample, method='ward')
+
+# Create a figure for the dendrogram
+plt.figure(figsize=(12, 8))
+dendrogram(linkage_matrix, truncate_mode='level', p=5)
+plt.title('Hierarchical Clustering Dendrogram (Sample)')
+plt.xlabel('Sample Index')
+plt.ylabel('Distance')
+plt.xticks(rotation=90)
+plt.tight_layout()
+plt.savefig('hierarchical_clustering_dendrogram.png')
+plt.close()
+
+# Determine optimal number of clusters
+n_clusters = 4
+
+# Perform clustering with the chosen number of clusters
+print(f"Performing clustering with {n_clusters} clusters...")
+cluster = AgglomerativeClustering(n_clusters=n_clusters, metric='euclidean', linkage='ward')
+cluster_labels = cluster.fit_predict(X_scaled)
+
+# Free up memory
+del X_scaled
+gc.collect()
+
+# Read the original data again to add cluster labels
+print("Adding cluster labels to the original data...")
+df = pd.read_csv(file_path, nrows=5000)  # Read the same sample
+df['Cluster'] = cluster_labels
+
+# Calculate cluster statistics
+print("Calculating cluster statistics...")
+cluster_stats = df.groupby('Cluster')[df.select_dtypes(include=[np.number]).columns].mean()
+print("\nCluster Statistics:")
+print(cluster_stats)
+
+# Save the clustered data
+print("Saving results...")
+df.to_csv('churn_data_clustered_sample.csv', index=False)
+
+# Create a heatmap of cluster centers
+plt.figure(figsize=(12, 8))
+sns.heatmap(cluster_stats, annot=True, cmap='YlOrRd', fmt='.2f')
+plt.title('Cluster Centers Heatmap')
+plt.tight_layout()
+plt.savefig('cluster_centers_heatmap.png')
+plt.close()
+
+# Print cluster sizes
+cluster_sizes = df['Cluster'].value_counts().sort_index()
+print("\nCluster Sizes:")
+print(cluster_sizes)
+
+print("Analysis complete!")
