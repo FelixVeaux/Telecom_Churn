@@ -25,8 +25,7 @@
 * Predictive churn model
 * Segmented customer profiles
 * Survival analysis results
-* Promotion budget strategy
-* Continuous monitoring dashboard
+
 
 ---
 
