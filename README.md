@@ -88,39 +88,6 @@ Churn prediction models:
 ### 05_Chrun_Prediction/01_Chrun_Prediction.ipynb
 - Generates churn predictions using survival analysis
 
-## Usage Examples
-
-### Installation
-```bash
-# Clone the repository
-git clone [repository-url]
-
-# Install required packages
-pip install -r requirements.txt
-```
-
-### Running Analysis
-```python
-# Example: Run customer segmentation
-python 02_Customer_Segments/02_Hierarchical_Clustering.py
-
-# Example: Generate RFM segments
-jupyter notebook 03_RFM_Analysis/Telecom_RFM_segmentation.ipynb
-```
-
-## Contributing
-
-We welcome contributions to improve this framework. Please follow these steps:
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
 ## Data Flow
 
 The project follows a sequential data processing pipeline:
