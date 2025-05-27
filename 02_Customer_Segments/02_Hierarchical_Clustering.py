@@ -65,10 +65,6 @@ X_scaled = scaler.fit_transform(df)
 del df
 gc.collect()
 
-# Determine optimal number of clusters
-n_clusters = 4
-min_cluster_size = 50  # Minimum 1% of sample size
-
 # Perform hierarchical clustering with a subset of data for the dendrogram
 print("Creating dendrogram...")
 sample_size = min(1000, len(X_scaled))  # Use a smaller sample for the dendrogram
@@ -82,7 +78,6 @@ plt.figure(figsize=(15, 10))
 dend = dendrogram(linkage_matrix,
                  truncate_mode='level',
                  p=5,
-                 color_threshold=linkage_matrix[-(n_clusters), 2],  # Color threshold based on actual number of clusters
                  leaf_font_size=10,
                  leaf_rotation=90)
 
@@ -92,11 +87,6 @@ plt.title('Customer Segmentation Dendrogram\n(Shows how customers are grouped ba
 plt.xlabel('Customer Index', fontsize=12)
 plt.ylabel('Distance (Dissimilarity)', fontsize=12)
 
-# Add a legend for the colors
-from matplotlib.patches import Patch
-legend_elements = [Patch(facecolor=f'C{i}', label=f'Cluster {i+1}') for i in range(n_clusters)]
-plt.legend(handles=legend_elements, loc='upper right')
-
 # Add a grid for better readability
 plt.grid(True, linestyle='--', alpha=0.7)
 
@@ -104,10 +94,44 @@ plt.tight_layout()
 plt.savefig(os.path.join(diagrams_folder, 'hierarchical_clustering_dendrogram.png'), dpi=300, bbox_inches='tight')
 plt.close()
 
-# Perform clustering with the chosen number of clusters
-print(f"Performing clustering with {n_clusters} clusters...")
-cluster = AgglomerativeClustering(n_clusters=n_clusters, metric='euclidean', linkage='ward')
-cluster_labels = cluster.fit_predict(X_scaled)
+print("\nAnalysis of the hierarchical structure:")
+print("1. The dendrogram shows the complete hierarchical relationship between customers")
+print("2. The height of each merge shows the distance between clusters being merged")
+print("3. Longer vertical lines indicate more distinct separations between groups")
+print("4. You can analyze the relationships at any level of the hierarchy")
+print("\nThe dendrogram has been saved to 'hierarchical_clustering_dendrogram.png'")
+print("You can use this to identify natural groupings in your customer base.")
+
+# Calculate and display some basic statistics about the hierarchical structure
+print("\nHierarchical Structure Statistics:")
+print(f"Total number of merges: {len(linkage_matrix)}")
+print(f"Maximum merge distance: {linkage_matrix[-1, 2]:.2f}")
+print(f"Average merge distance: {np.mean(linkage_matrix[:, 2]):.2f}")
+
+# Analyze churn distribution in the sample
+print("\nAnalyzing churn distribution in the sample dataset...")
+# Read the churn column for the sample
+churn_data = pd.read_csv(file_path, usecols=['churn'], nrows=5000)
+churn_distribution = churn_data['churn'].value_counts()
+churn_percentage = (churn_distribution / len(churn_data) * 100).round(2)
+
+print("\nChurn Distribution:")
+print(f"Total customers in sample: {len(churn_data)}")
+print("\nCounts:")
+print(churn_distribution)
+print("\nPercentages:")
+print(churn_percentage)
+
+# Create a bar plot of churn distribution
+plt.figure(figsize=(10, 6))
+sns.countplot(data=churn_data, x='churn')
+plt.title('Distribution of Churn in Sample Dataset', fontsize=14, pad=20)
+plt.xlabel('Churn Status', fontsize=12)
+plt.ylabel('Number of Customers', fontsize=12)
+plt.xticks([0, 1], ['No Churn', 'Churn'])
+plt.tight_layout()
+plt.savefig(os.path.join(diagrams_folder, 'churn_distribution.png'), dpi=300, bbox_inches='tight')
+plt.close()
 
 # Check cluster sizes
 cluster_sizes = pd.Series(cluster_labels).value_counts()
@@ -115,8 +139,8 @@ print("\nInitial cluster sizes:")
 print(cluster_sizes)
 
 # If any cluster is too small, increase number of clusters and try again
-while any(cluster_sizes < min_cluster_size):
-    n_clusters -= 1
+while any(cluster_sizes < 50):  # Assuming a default minimum cluster size
+    n_clusters += 1
     print(f"\nSome clusters too small. Trying with {n_clusters} clusters...")
     cluster = AgglomerativeClustering(n_clusters=n_clusters, metric='euclidean', linkage='ward')
     cluster_labels = cluster.fit_predict(X_scaled)
@@ -124,7 +148,7 @@ while any(cluster_sizes < min_cluster_size):
     print("New cluster sizes:")
     print(cluster_sizes)
     
-    if n_clusters <= 2:  # Stop if we can't find a good solution
+    if n_clusters > 10:  # Stop if we can't find a good solution
         print("Warning: Could not find clusters with minimum size requirement")
         break
 
