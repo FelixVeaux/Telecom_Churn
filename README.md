@@ -49,15 +49,6 @@ Kaplan-Meier and Cox Proportional Hazards analysis:
 Churn prediction models:
 - `01_Chrun_Prediction.ipynb` - Implementation of churn prediction models
 
-### Top-Level Files
-- `feature_engineering_visual.png` - Visualization of feature engineering process
-- `churn_data_clustered_sample.csv` - Sample dataset with clustering results
-- `cluster_summary.csv` - Summary statistics of customer clusters
-- `final_clean_data_dictionary.xlsx` - Comprehensive data dictionary
-- `KMF_COX_CHURN_Prediction.ipynb` - Main prediction notebook
-- `PlanningSteps.md` - Project planning and methodology documentation
-- `PlanningPseaudoCode.md` - Detailed pseudocode for implementation
-
 ## Detailed File Index
 
 ### 01_Initial_Data/feature_engineering_visual.py
